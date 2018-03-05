@@ -37,10 +37,10 @@ if($Type == "s_admin" || $Type == "admin"){
 		  <INPUT type=\"submit\" name=\"UserManagement\" value=\"User Management\" style=\"height:25px; width:150px\"> 
 		  </FORM>");
 	  
-//	echo("<FORM name=\"StudentManagement\" method=\"post\" action=\"StudentManagement.php?SessionId=$SessionId\"> 
-//		  <input type=\"hidden\" name=\"SessionId\" value=$SessionId>
-//		  <INPUT type=\"submit\" name=\"StudentManagement\" value=\"Student Management\" style=\"height:25px; width:150px\"> 
-//		  </FORM>");
+	echo("<FORM name=\"StudentManagement\" method=\"post\" action=\"StudentManagement.php?SessionId=$SessionId\"> 
+		  <input type=\"hidden\" name=\"SessionId\" value=$SessionId>
+		  <INPUT type=\"submit\" name=\"StudentManagement\" value=\"Student Management\" style=\"height:25px; width:150px\"> 
+		  </FORM>");
 
 	echo("<br />");
 	echo("<br />");
