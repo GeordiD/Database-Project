@@ -25,7 +25,13 @@ echo("<FORM name=\"SearchUser\" method=\"post\" action=\"SearchUser.php?SessionI
 	  <INPUT type=\"hidden\" name=\"SessionId\" value=$SessionId>
 	  <INPUT type=\"submit\" name=\"SearchUser\" value=\"Search User\" style=\"height:25px; width:150px\"> 
 	  </FORM>");
-
+/*
+echo("<FORM name=\"AddUser\" method=\"post\" action=\"AddUser.php?SessionId=$SessionId&UserId=$UserId\">
+	  <INPUT type=\"hidden\" name=\"PrevURL\" value=$CurURL>
+	  <INPUT type=\"hidden\" name=\"SessionId\" value=$SessionId>
+	  <INPUT type=\"submit\" name=\"AddUser\" value=\"Add User\" style=\"height:25px; width:150px\"> 
+	  </FORM>");
+*/
 echo("<br />");
 echo("<br />");
 echo("<br />");	  
