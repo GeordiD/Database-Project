@@ -97,10 +97,11 @@ function isStudent($UserID) {
   return $values[0] != NULL;
 }
 
-function test_sql_cmd($sql) {
-  $return_array = execute_sql_in_oracle($sql);
-  echo "flag = " . $return_array["flag"] .
-	"<br>cursor = " . $return_array["cursor"];
+function getStudentID($UserID) {
+  $query = execute_sql_in_oracle(
+    "select student_id from student where userid = '$UserID'");
+  $values = oci_fetch_array($query["cursor"]);
+  return $values[0];
 }
 
 //********************

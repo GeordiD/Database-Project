@@ -123,6 +123,10 @@ insert into Course (Course_ID, Max_Seats, C_Num, Title, credits, Start_Time, End
 	values ('0002',  25, 'CMSC1513', 'Beginning Programming', 3, '11:00', '13:00', 2018, 'Fal');
 insert into Course (Course_ID, Max_Seats, C_Num, Title, credits, Start_Time, End_Time, yr, Season) 
 	values ('0003', 15, 'CMSC4173', 'Translator Design', 3, '18:00', '19:00', 2019, 'Spr');
+
+insert into Enrollment (Course_id, student_id, grade) values ('0001', '12345', -1);
+insert into Enrollment (Course_id, student_id, grade) values ('0002', '12345', 4);
+insert into Enrollment (Course_id, student_id, grade) values ('0003', '12345', 2);
 	
 
 prompt ---------------------;

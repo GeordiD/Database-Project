@@ -1,7 +1,7 @@
 <?
 include "UtilityFunctions.php";
 
-function custome_printtable($sql, $labels) {
+function custom_printtable($sql, $labels) {
 $result_array = execute_sql_in_oracle ($sql);
 	$result = $result_array["flag"];
 	$cursor = $result_array["cursor"];
@@ -77,13 +77,72 @@ $cursor = $result_array["cursor"];
 
 $sql_stud_info = "select * from student where userid = '$UserId'";
 
-echo custome_printtable($sql_stud_info, array('StudentID', 'Username', 'FirstName', 'Last Name', 'Age', 'Street Address', 'City', 'State', 'Zip Code', 'Student Type', 'On Probation'));
+echo custom_printtable($sql_stud_info, array('StudentID', 'Username', 'FirstName', 'Last Name', 'Age', 'Street Address', 'City', 'State', 'Zip Code', 'Student Type', 'On Probation'));
 
 echo "----<br>";
 
 echo "<h3>Current Schedule</h3>";
-$sql_cur_sch = "select course_id, dept_id, c_num, title, season, yr, credits";
+$student_id = getStudentId($UserId);
+$sql_cur_sch = "select course_id, c_num, title, season, yr, credits " .
+	"from Course natural join Enrollment " . 
+	"where student_id='$student_id' and grade='-1'"; 
+$labels = array('Course ID', 'Course Number', 'Title', 'Semester', 'Credits');
 
+echo "studentid = " . $sql_cur_sch;
+
+echo statement_to_table($sql_cur_sch, 0, 0);
+
+$result_array = execute_sql_in_oracle ($sql_cur_sch);
+$result = $result_array["flag"];
+$cursor = $result_array["cursor"];
+
+if ($result == false){
+	display_oracle_error_message($cursor);
+	die("SQL Execution problem.");
+}
+	
+if ($cursor == false) {
+	display_oracle_error_message($connection);
+	oci_close ($connection);
+	// sql failed 
+	die("SQL Parsing Failed");
+}	
+	
+$displayString = "<table border=\"1\">";	
+$displayString .= "<tr>";
+foreach($labels as $label){
+	$displayString .= "<col width=\"130\">";
+}
+foreach($labels as $label){
+	$displayString .= "<td><b>$label</b></td>";
+}
+$displayString .= "</tr>";
+
+while($values = oci_fetch_assoc ($cursor)){
+	$displayString .= "<tr>";
+
+	$iterator = 0;
+	foreach($values as $element) {
+		$iterator++;
+		if($iterator == 4) {
+			$displayString .= "<td>$element";
+		} else if ($iterator == 5) {
+			$displayString .= "$element</td>";
+		} else {
+			$displayString .= "<td>$element</td>";
+		}
+	}
+
+	$displayString .= "</tr>";
+
+}
+	
+$displayString .= "<table>";
+$displayString .= "<br />";
+$displayString .= "<br />";
+
+oci_free_statement($cursor);
+echo $displayString;
 
 echo "----<br>";
 
