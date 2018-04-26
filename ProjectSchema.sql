@@ -39,7 +39,7 @@ create table Student(
   Fname varchar2(32),
   LName varchar2(32),
   Age number,
-  Street_Adress varchar2(64),
+  Street_Address varchar2(64),
   City varchar2(32),
   State varchar2(2),
   Zip_Code varchar2(5),

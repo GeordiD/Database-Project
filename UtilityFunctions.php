@@ -89,6 +89,14 @@ function execute_sql_in_oracle($sql) {
   return $return_array;
 }
 
+function isStudent($UserID) {
+  $query = execute_sql_in_oracle(
+    "select userid from student where userid = '$UserID'"
+  );
+  $values = oci_fetch_array($query["cursor"]);
+  return $values[0] != NULL;
+}
+
 function test_sql_cmd($sql) {
   $return_array = execute_sql_in_oracle($sql);
   echo "flag = " . $return_array["flag"] .
@@ -117,7 +125,7 @@ function verify_session($SessionId) {
   }
 
   if(!($values = oci_fetch_array ($cursor))){
-    // no active session - clientid is unknown
+    /// no active session - clientid is unknown
     die("Invalid client!");
   } 
   oci_free_statement($cursor);
