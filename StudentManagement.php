@@ -1,6 +1,59 @@
 <?
 include "UtilityFunctions.php";
 
+function custome_printtable($sql, $labels) {
+$result_array = execute_sql_in_oracle ($sql);
+	$result = $result_array["flag"];
+	$cursor = $result_array["cursor"];
+	
+	if ($result == false){
+		display_oracle_error_message($cursor);
+		die("SQL Execution problem.");
+	}
+	
+	if ($cursor == false) {
+		display_oracle_error_message($connection);
+		oci_close ($connection);
+		// sql failed 
+		die("SQL Parsing Failed");
+	}	
+	
+	$displayString = "<table border=\"1\">";	
+	$displayString .= "<tr>";
+	foreach($labels as $label){
+		$displayString .= "<col width=\"130\">";
+	}
+	foreach($labels as $label){
+		$displayString .= "<td><b>$label</b></td>";
+	}
+	$displayString .= "</tr>";
+
+	while($values = oci_fetch_assoc ($cursor)){
+		$displayString .= "<tr>";
+		$iterator = 0;
+		foreach($values as $element){
+			$iterator++;
+			if($iterator == 11) {
+				if($element == 0) {
+					$element = 'no';
+				} else if($element == 1) {
+					$element = 'yes';
+				}
+			}
+			$displayString .= "<td>$element</td>"; 	
+		}
+		$displayString .= "</tr>";
+	}
+		
+	$displayString .= "<table>";
+	$displayString .= "<br />";
+	$displayString .= "<br />";
+	
+	oci_free_statement($cursor);
+	return $displayString;
+}
+
+
 //Verify the user session
 $SessionId =$_GET["SessionId"];
 $UserId =$_GET["UserId"];
@@ -17,15 +70,16 @@ echo("<h2>Student Management:</h2>");
 
 echo ("<h3>Student Information</h3>");
 
-$return_array = execute_sql_in_oracle("select * from student where userid='$UserId'");
+$sql_student_info = "select * from student where userid='$UserId'"; 
+
+$return_array = execute_sql_in_oracle($sql_student_info);
 $cursor = $result_array["cursor"];
 
-while($row = oci_fetch_array($cursor)) {
-  oci_free_statement($cursor);
-  echo "student = " . $row[0] . "<br>";
-}
+$sql_stud_info = "select * from student where userid = '$UserId'";
 
-echo "----";
+echo custome_printtable($sql_stud_info, array('StudentID', 'Username', 'FirstName', 'Last Name', 'Age', 'Street Address', 'City', 'State', 'Zip Code', 'Student Type', 'On Probation'));
+
+echo "----<br>";
 
 echo("<FORM name=\"SectionSearch\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId\"> 
 	  <INPUT type=\"hidden\" name=\"UserId\" value=$UserId>
