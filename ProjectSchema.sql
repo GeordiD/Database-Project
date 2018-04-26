@@ -54,10 +54,10 @@ prompt --Drop Semester;
 drop table Semester cascade constraints;
 prompt --Create Semester;
 create table Semester(
-  Year number,
+  yr number,
   Season varchar2(3),
   Deadline date,
-  primary key(year, season)
+  primary key(yr, season)
 );
 
 prompt ---;
@@ -71,7 +71,10 @@ create table Course(
   C_Num number,
   Title varchar2(32),
   Start_Time varchar2(5),
-  End_Time varchar2(5)
+  End_Time varchar2(5),
+  yr number,
+  Season varchar2(3),
+  foreign key(yr, season) references Semester(yr, season)
 );
 
 prompt ---;
@@ -93,12 +96,12 @@ create table Enrollment (
   Course_ID number,
   Student_ID number,
   Season varchar2(3),
-  Year number,
+  yr number,
   Grade number,
   primary key(Course_ID, Student_ID),
   foreign key(course_id) references Course,
   foreign key(student_id) references Student,
-  foreign key(season,year) references Semester(season, year)
+  foreign key(season,yr) references Semester(season, yr)
 );
 
 
@@ -112,12 +115,19 @@ insert into Users (UserID, password, isadmin) values ('greg', '1234', 0);
 insert into Student (Student_ID, UserID, Fname, Lname, Age, Street_Address, City, State, Zip_Code, Student_Type, On_Probation) 
 	values ('12345', 'george', 'George', 'Dosher', 21, '1234 Broadway Ext', 'Edmond', 'OK', '73003', 'undergrad', 0);
 
-insert into Course (Course_ID, Dept_ID, Max_Seats, C_Num, Title, Start_Time, End_Time) 
-	values ('0001', 'CMSC', 20, 1053, 'Computer Technology', '09:00', '10:00');
-insert into Course (Course_ID, Dept_ID, Max_Seats, C_Num, Title, Start_Time, End_Time) 
-	values ('0002', 'CMSC', 25, 1513, 'Beginning Programming', '11:00', '13:00');
-insert into Course (Course_ID, Dept_ID, Max_Seats, C_Num, Title, Start_Time, End_Time) 
-	values ('0003', 'CMSC', 15, 4173, 'Translator Design', '18:00', '19:00');
+	
+insert into Semester(yr, Season, Deadline) values ('2018', 'Fal', TO_DATE('09/01/2018', 'mm/dd/yyyy'));
+insert into Semester(yr, Season, Deadline) values ('2019', 'Spr', TO_DATE('1/01/2019', 'mm/dd/yyyy'));	
+
+	
+insert into Course (Course_ID, Dept_ID, Max_Seats, C_Num, Title, Start_Time, End_Time, yr, Season) 
+	values ('0001', 'CMSC', 20, 1053, 'Computer Technology', '09:00', '10:00', 2018, 'Fal');
+insert into Course (Course_ID, Dept_ID, Max_Seats, C_Num, Title, Start_Time, End_Time, yr, Season) 
+	values ('0002', 'CMSC', 25, 1513, 'Beginning Programming', '11:00', '13:00', 2018, 'Fal');
+insert into Course (Course_ID, Dept_ID, Max_Seats, C_Num, Title, Start_Time, End_Time, yr, Season) 
+	values ('0003', 'CMSC', 15, 4173, 'Translator Design', '18:00', '19:00', 2019, 'Spr');
+	
+
 
 prompt ---------------------;
 prompt Heres all the tables;
