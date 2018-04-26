@@ -82,6 +82,8 @@ echo custome_printtable($sql_stud_info, array('StudentID', 'Username', 'FirstNam
 echo "----<br>";
 
 echo "<h3>Current Schedule</h3>";
+$sql_cur_sch = "select course_id, dept_id, c_num, title, season, yr, credits";
+
 
 echo "----<br>";
 

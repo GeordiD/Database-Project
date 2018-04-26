@@ -66,10 +66,10 @@ drop table Course cascade constraints;
 prompt --Create Course;
 create table Course(
   Course_ID number primary key,
-  Dept_ID varchar2(4),
   Max_Seats number,
-  C_Num number,
+  C_Num varchar2(8),
   Title varchar2(32),
+  Credits number,
   Start_Time varchar2(5),
   End_Time varchar2(5),
   yr number,
@@ -95,13 +95,10 @@ prompt --Create Enrollment;
 create table Enrollment (
   Course_ID number,
   Student_ID number,
-  Season varchar2(3),
-  yr number,
   Grade number,
   primary key(Course_ID, Student_ID),
   foreign key(course_id) references Course,
-  foreign key(student_id) references Student,
-  foreign key(season,yr) references Semester(season, yr)
+  foreign key(student_id) references Student
 );
 
 
@@ -120,14 +117,13 @@ insert into Semester(yr, Season, Deadline) values ('2018', 'Fal', TO_DATE('09/01
 insert into Semester(yr, Season, Deadline) values ('2019', 'Spr', TO_DATE('1/01/2019', 'mm/dd/yyyy'));	
 
 	
-insert into Course (Course_ID, Dept_ID, Max_Seats, C_Num, Title, Start_Time, End_Time, yr, Season) 
-	values ('0001', 'CMSC', 20, 1053, 'Computer Technology', '09:00', '10:00', 2018, 'Fal');
-insert into Course (Course_ID, Dept_ID, Max_Seats, C_Num, Title, Start_Time, End_Time, yr, Season) 
-	values ('0002', 'CMSC', 25, 1513, 'Beginning Programming', '11:00', '13:00', 2018, 'Fal');
-insert into Course (Course_ID, Dept_ID, Max_Seats, C_Num, Title, Start_Time, End_Time, yr, Season) 
-	values ('0003', 'CMSC', 15, 4173, 'Translator Design', '18:00', '19:00', 2019, 'Spr');
+insert into Course (Course_ID, Max_Seats, C_Num, Title, credits, Start_Time, End_Time, yr, Season) 
+	values ('0001', 20, 'CMSC1053', 'Computer Technology', 3, '09:00', '10:00', 2018, 'Fal');
+insert into Course (Course_ID, Max_Seats, C_Num, Title, credits, Start_Time, End_Time, yr, Season) 
+	values ('0002',  25, 'CMSC1513', 'Beginning Programming', 3, '11:00', '13:00', 2018, 'Fal');
+insert into Course (Course_ID, Max_Seats, C_Num, Title, credits, Start_Time, End_Time, yr, Season) 
+	values ('0003', 15, 'CMSC4173', 'Translator Design', 3, '18:00', '19:00', 2019, 'Spr');
 	
-
 
 prompt ---------------------;
 prompt Heres all the tables;
