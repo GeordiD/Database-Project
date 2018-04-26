@@ -9,7 +9,7 @@ $CurURL = "http://www.comsc.uco.edu/~gq011/Welcome.php?SessionId=" . $SessionId 
 verify_session($SessionId);
 
 
-$sql = "select Name, Type from Users " .
+$sql = "select isAdmin from Users " .
        "where UserId ='$UserId' ";
 	   
 $result_array = execute_sql_in_oracle ($sql);
@@ -24,13 +24,12 @@ if ($result == false){
 $values = oci_fetch_array ($cursor);
 oci_free_statement($cursor);
 
-$Name = $values[0];
-$Type = $values[1];
+$isAdmin = $values[0];
 
 // Here we can generate the content of the welcome page
-echo("<h2>Welcome $Name!</h2>");
+echo("<h2>Welcome User!</h2>");
 
-if($Type == "s_admin" || $Type == "admin"){
+if($isAdmin == '1'){
 	echo("<h2>Admin Menu:</h2>");
 	echo("<FORM name=\"UserManagement\" method=\"post\" action=\"UserManagement.php?SessionId=$SessionId&UserId=$UserId\"> 
 		  <INPUT type=\"hidden\" name=\"PrevURL\" value=$CurURL>
@@ -46,7 +45,7 @@ if($Type == "s_admin" || $Type == "admin"){
 	echo("<br />");
 }
 
-if($Type == "s_admin" || $Type == "student"){
+if($isAdmin == 1 || $Type == "student"){
 	echo("<h2>Student Menu:</h2>");
 	echo("Not implemented yet");  
 

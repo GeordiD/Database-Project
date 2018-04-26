@@ -27,8 +27,8 @@ while($GeneratedId == false){
 }
 
 $sql = "insert into Users " .
-		"(UserId, Name, Password, Type) " .
-		"values ('$UserId', '$Name', '$Password', '&type_student')";
+		"(UserId, Password, isAdmin) " .
+		"values ('$UserId', '$Password', 0)";
 	   
 $result_array = execute_sql_in_oracle ($sql);
 $result = $result_array["flag"];

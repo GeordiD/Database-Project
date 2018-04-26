@@ -6,7 +6,7 @@ include "UtilityFunctions.php";
 $UserId = $_POST["UserId"];
 $Password = $_POST["Password"];
 
-$sql = "select UserId, Type, Name from Users " .
+$sql = "select UserId, isAdmin from Users " .
        "where UserId ='$UserId' " .
        "and Password ='$Password'";
 	   
@@ -18,7 +18,11 @@ if ($result == false){
   display_oracle_error_message($cursor);
   die("Client Query Failed.");
 }
-
+/*
+$test = execute_sql_in_oracle("select * from users");
+$values = oci_fetch_array ($test["cursor"]);
+echo $values[0] . "<br>";
+*/
 if($values = oci_fetch_array ($cursor)){
 	oci_free_statement($cursor);
 
@@ -36,7 +40,6 @@ if($values = oci_fetch_array ($cursor)){
 		"(SessionId, UserId, SessionDate, SessionType) " .
 		"values ('$SessionId', '$UserId', SysDate, '$SessionType')";
 
-		
 	  $result_array = execute_sql_in_oracle ($sql);
 	  $result = $result_array["flag"];
 		

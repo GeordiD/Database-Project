@@ -8,8 +8,8 @@ verify_session($SessionId);
 verify_admin($SessionId);
 
 //the previous url, used in the back button
-$PrevURL = "http://www.comsc.uco.edu/~gq011/Welcome.php?SessionId=" . $SessionId . "&UserId=" . $UserId;
-$CurURL = "http://www.comsc.uco.edu/~gq011/UserManagement.php?SessionId=" . $SessionId . "&UserId=" . $UserId;
+$PrevURL = "http://www.comsc.uco.edu/~" . get_sql_username() . "/Welcome.php?SessionId=" . $SessionId . "&UserId=" . $UserId;
+$CurURL = "http://www.comsc.uco.edu/~" . get_sql_username() . "/UserManagement.php?SessionId=" . $SessionId . "&UserId=" . $UserId;
 
 // Here we can generate the content of the welcome page
 echo("<h2>Manage Users:</h2>");

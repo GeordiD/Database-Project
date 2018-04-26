@@ -89,6 +89,12 @@ function execute_sql_in_oracle($sql) {
   return $return_array;
 }
 
+function test_sql_cmd($sql) {
+  $return_array = execute_sql_in_oracle($sql);
+  echo "flag = " . $return_array["flag"] .
+	"<br>cursor = " . $return_array["cursor"];
+}
+
 //********************
 // Verify the session id.  
 // Return normally if it is verified.
@@ -133,7 +139,7 @@ function verify_admin($SessionId) {
     die("SQL Execution problem.");
   }
 	$type = oci_fetch_array ($cursor)[0];
-  if($type != "admin" && $type != "s_admin"){
+  if($type != 1){
     // no active session - clientid is unknown
     die("You do not have admin rights!");
   } 
