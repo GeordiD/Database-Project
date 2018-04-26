@@ -29,7 +29,7 @@ $isAdmin = $values[0];
 // Here we can generate the content of the welcome page
 echo("<h2>Welcome User!</h2>");
 
-if($isAdmin == '1'){
+if($isAdmin == 1 && $Type == "admin"){
 	echo("<h2>Admin Menu:</h2>");
 	echo("<FORM name=\"UserManagement\" method=\"post\" action=\"UserManagement.php?SessionId=$SessionId&UserId=$UserId\"> 
 		  <INPUT type=\"hidden\" name=\"PrevURL\" value=$CurURL>
@@ -45,14 +45,30 @@ if($isAdmin == '1'){
 	echo("<br />");
 }
 
-if($isAdmin == 1 || $Type == "student"){
-	echo("<h2>Student Menu:</h2>");
-	echo("Not implemented yet");  
+else if($isAdmin == 1 && $Type == "student"){
+	
+	echo("<h2>Admin Menu:</h2>");
+	echo("<FORM name=\"UserManagement\" method=\"post\" action=\"UserManagement.php?SessionId=$SessionId&UserId=$UserId\"> 
+		  <INPUT type=\"hidden\" name=\"PrevURL\" value=$CurURL>
+		  <INPUT type=\"submit\" name=\"UserManagement\" value=\"User Management\" style=\"height:25px; width:150px\"> 
+		  </FORM>");
+	
+	echo("<h2>Student Menu:</h2>");	
+	echo("<FORM name=\"StudentManagement\" method=\"post\" action=\"StudentManagement.php?SessionId=$SessionId\"> 
+		<input type=\"hidden\" name=\"SessionId\" value=$SessionId>
+		<INPUT type=\"submit\" name=\"StudentManagement\" value=\"Student Management\" style=\"height:25px; width:150px\"> 
+		</FORM>");  
 
 	echo("<br />");
 	echo("<br />");
 }
-
+else{
+	echo("<h2>Student Menu:</h2>");	
+	echo("<FORM name=\"StudentManagement\" method=\"post\" action=\"StudentManagement.php?SessionId=$SessionId\"> 
+		<input type=\"hidden\" name=\"SessionId\" value=$SessionId>
+		<INPUT type=\"submit\" name=\"StudentManagement\" value=\"Student Management\" style=\"height:25px; width:150px\"> 
+		</FORM>"); 
+}
 
 echo("<FORM name=\"ChangePassword\" method=\"post\" action=\"ChangePassword.php?SessionId=$SessionId\"> 
 	  <h2>Change Password</h2>
