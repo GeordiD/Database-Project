@@ -25,7 +25,6 @@ oci_free_statement($cursor);
 
 $isAdmin = $values[0];
 $isStudent = isStudent($UserId);
-
 // Here we can generate the content of the welcome page
 echo("<h2>Welcome User!</h2>");
 
@@ -63,13 +62,6 @@ if($isStudent == 1){
 
 	echo("<br />");
 	echo("<br />");
-}
-else{
-	echo("<h2>Student Menu:</h2>");	
-	echo("<FORM name=\"StudentManagement\" method=\"post\" action=\"StudentManagement.php?SessionId=$SessionId\"> 
-		<input type=\"hidden\" name=\"SessionId\" value=$SessionId>
-		<INPUT type=\"submit\" name=\"StudentManagement\" value=\"Student Management\" style=\"height:25px; width:150px\"> 
-		</FORM>"); 
 }
 
 echo("<FORM name=\"ChangePassword\" method=\"post\" action=\"ChangePassword.php?SessionId=$SessionId\"> 
