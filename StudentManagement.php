@@ -88,10 +88,6 @@ $sql_cur_sch = "select course_id, c_num, title, season, yr, credits " .
 	"where student_id='$student_id' and grade='-1'"; 
 $labels = array('Course ID', 'Course Number', 'Title', 'Semester', 'Credits');
 
-echo "studentid = " . $sql_cur_sch;
-
-echo statement_to_table($sql_cur_sch, 0, 0);
-
 $result_array = execute_sql_in_oracle ($sql_cur_sch);
 $result = $result_array["flag"];
 $cursor = $result_array["cursor"];
@@ -147,7 +143,7 @@ echo $displayString;
 echo "----<br>";
 
 
-echo("<FORM name=\"SectionSearch\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId\"> 
+echo("<FORM name=\"SectionSearch\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId&UserId=$UserId\"> 
 	  <INPUT type=\"hidden\" name=\"UserId\" value=$UserId>
 	  <INPUT type=\"submit\" name=\"SectionSearch\" value=\"Enroll in a section\" style=\"height:25px; width:150px\"> 
 	  </FORM>");
@@ -157,11 +153,75 @@ echo("<br />");
 echo("<br />");
 
 echo "<h3>GPA: ";
-//get gpa
+$studentid = getStudentID($UserId);
+$query = execute_sql_in_oracle(
+	"select sum(grade * credits)/sum(credits) " .
+	"from enrollment natural join course " .
+	"where student_id = '$studentid' and grade>=0"
+);
+$values = oci_fetch_array($query["cursor"]);
+echo $values[0];
 echo "</h3><br>";
 
 echo "<h3>Previous Schedule</h3>";
 
+$student_id = getStudentId($UserId);
+$sql_cur_sch = "select course_id, c_num, title, season, yr, credits, grade " .
+	"from Course natural join Enrollment " . 
+	"where student_id='$student_id' and not grade='-1'"; 
+$labels = array('Course ID', 'Course Number', 'Title', 'Semester', 'Credits', 'Grade');
+
+$result_array = execute_sql_in_oracle ($sql_cur_sch);
+$result = $result_array["flag"];
+$cursor = $result_array["cursor"];
+
+if ($result == false){
+	display_oracle_error_message($cursor);
+	die("SQL Execution problem.");
+}
+	
+if ($cursor == false) {
+	display_oracle_error_message($connection);
+	oci_close ($connection);
+	// sql failed 
+	die("SQL Parsing Failed");
+}	
+	
+$displayString = "<table border=\"1\">";	
+$displayString .= "<tr>";
+foreach($labels as $label){
+	$displayString .= "<col width=\"130\">";
+}
+foreach($labels as $label){
+	$displayString .= "<td><b>$label</b></td>";
+}
+$displayString .= "</tr>";
+
+while($values = oci_fetch_assoc ($cursor)){
+	$displayString .= "<tr>";
+
+	$iterator = 0;
+	foreach($values as $element) {
+		$iterator++;
+		if($iterator == 4) {
+			$displayString .= "<td>$element";
+		} else if ($iterator == 5) {
+			$displayString .= "$element</td>";
+		} else {
+			$displayString .= "<td>$element</td>";
+		}
+	}
+
+	$displayString .= "</tr>";
+
+}
+	
+$displayString .= "<table>";
+$displayString .= "<br />";
+$displayString .= "<br />";
+
+oci_free_statement($cursor);
+echo $displayString;
 
 echo("<FORM name=\"Back\" method=\"post\" action=$PrevURL> 
 	  <INPUT type=\"hidden\" name=\"SessionId\" value=$SessionId>
