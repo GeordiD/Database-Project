@@ -23,10 +23,10 @@ function sectionsBySemester(&$displaystring){
 function sectionsByPartialId(&$displaystring){
 	echo("<h2> Search Sections:</h2>");
 	$SearchId = $_POST['SearchId'];
-	$sql = "select * from Users where UserId = '$SearchId'";
+	$sql = "select * from Course where Course_ID = '$SearchId'";
 	$count = oci_fetch_array (execute_sql_in_oracle ("SELECT Count(*) FROM Users")["cursor"])[0];
 	oci_free_statement($cursor);
-	return statement_to_table($sql, $count, array("UserId", "Name", "Password", "User Type"));
+	return statement_to_table($sql, $count, array("Course_ID", "Dept", "Max seats", "C_Num", "Title", "start", "end"));
 }
 
 function deleteRecord(&$displaystring){
@@ -71,6 +71,12 @@ function addInfo(){
 $buttonString = 
 	"<h2>View All or Search Sections:</h2>" .
 	
+	"<FORM name=\"allSections\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId\"> " .	
+		"Year:  <INPUT type=\"text\" name=\"SearchId\" size=\"8\" maxlength=\"8\"> <br />" .
+		"Season:  <INPUT type=\"text\" name=\"SearchId\" size=\"8\" maxlength=\"8\"> <br />" .
+		"<input type=\"submit\" class=\"button\" name=\"allSections\" value=\"View All Sections\" />" .
+	"</FORM>" .
+	
 	"<FORM name=\"sectionsBySemester\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId\"> " .	
 		"Year:  <INPUT type=\"text\" name=\"SearchId\" size=\"8\" maxlength=\"8\"> <br />" .
 		"Season:  <INPUT type=\"text\" name=\"SearchId\" size=\"8\" maxlength=\"8\"> <br />" .
@@ -80,7 +86,7 @@ $buttonString =
 	"<br />" .
 
 	
-	"<FORM name=\"sectionsByPartialId\" method=\"post\" action=\"ViewUsers.php?SessionId=$SessionId\"> " .
+	"<FORM name=\"sectionsByPartialId\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId\"> " .
 		"Section Id:  <INPUT type=\"text\" name=\"SearchId\" size=\"8\" maxlength=\"8\"> <br />" .
 		"<input type=\"submit\" class=\"button\" name=\"sectionsByPartialId\" value=\"Search Section By Id\" />" .
 	"</FORM>" .
@@ -125,8 +131,8 @@ echo($headerString);
 if(isset($_POST['displayAll'])){
 	echo(displayAll($displaystring));
 }
-elseif(isset($_POST['displaySearch'])){
-	echo(displaySearch($displaystring));
+elseif(isset($_POST['sectionsByPartialId'])){
+	echo(sectionsByPartialId($displaystring));
 }
 elseif(isset($_POST['updateInfo'])){
 	updateInfo();
