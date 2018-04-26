@@ -166,7 +166,7 @@ $buttonString = "<h2>View All or Search Users:</h2>" .
 	"<br />" . 
 	"<br />" . 
 
-	"<FORM name=\"Back\" method=\"post\" action=\"http://www.comsc.uco.edu/~gq011/UserManagement.php?SessionId=$SessionId&UserId=$UserId\"> " . 
+	"<FORM name=\"Back\" method=\"post\" action=\"http://www.comsc.uco.edu/~" . get_sql_username() . "/UserManagement.php?SessionId=$SessionId&UserId=$UserId\"> " . 
 	  "<input type=\"hidden\" name=\"SessionId\" value=$SessionId> ".
 	  "<INPUT type=\"submit\" name=\"Back\" value=Back> ".
 	  "</FORM>";

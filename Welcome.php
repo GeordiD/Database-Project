@@ -4,7 +4,7 @@ include "UtilityFunctions.php";
 $values = $_GET["values"];
 $SessionId = $_GET["SessionId"];
 $UserId = $_GET["UserId"];
-$CurURL = "http://www.comsc.uco.edu/~gq011/Welcome.php?SessionId=" . $SessionId . "&UserId=" . $UserId;
+$CurURL = "http://www.comsc.uco.edu/~" . get_sql_username() . "/Welcome.php?SessionId=" . $SessionId . "&UserId=" . $UserId;
 
 verify_session($SessionId);
 
@@ -25,7 +25,6 @@ oci_free_statement($cursor);
 
 $isAdmin = $values[0];
 $isStudent = isStudent($UserId);
-echo "things = $isStudent";
 
 // Here we can generate the content of the welcome page
 echo("<h2>Welcome User!</h2>");
@@ -56,7 +55,7 @@ if($isStudent == 1){
 //		  </FORM>");
 	
 	echo("<h2>Student Menu:</h2>");	
-	echo("<FORM name=\"StudentManagement\" method=\"post\" action=\"StudentManagement.php?SessionId=$SessionId\"> 
+	echo("<FORM name=\"StudentManagement\" method=\"post\" action=\"StudentManagement.php?SessionId=$SessionId&UserId=$UserId\"> 
 		<input type=\"hidden\" name=\"SessionId\" value=$SessionId>
 		<INPUT type=\"submit\" name=\"StudentManagement\" value=\"Student Management\" style=\"height:25px; width:150px\"> 
 		</FORM>");  

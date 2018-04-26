@@ -9,11 +9,23 @@ verify_session($SessionId);
 
     
 //the previous url, used in the back button
-$PrevURL = "http://www.comsc.uco.edu/~gq011/Welcome.php?SessionId=" . $SessionId . "&UserId=" . $UserId;
-$CurURL = "http://www.comsc.uco.edu/~gq011/StudentManagement.php?SessionId=" . $SessionId . "&UserId=" . $UserId;
+$PrevURL = "http://www.comsc.uco.edu/~" . get_sql_username() . "/Welcome.php?SessionId=" . $SessionId . "&UserId=" . $UserId;
+$CurURL = "http://www.comsc.uco.edu/~" . get_sql_username() . "/StudentManagement.php?SessionId=" . $SessionId . "&UserId=" . $UserId;
 
 // Here we can generate the content of the welcome page
 echo("<h2>Student Management:</h2>");
+
+echo ("<h3>Student Information</h3>");
+
+$return_array = execute_sql_in_oracle("select * from student where userid='$UserId'");
+$cursor = $result_array["cursor"];
+
+while($row = oci_fetch_array($cursor)) {
+  oci_free_statement($cursor);
+  echo "student = " . $row[0] . "<br>";
+}
+
+echo "----";
 
 echo("<FORM name=\"SectionSearch\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId\"> 
 	  <INPUT type=\"hidden\" name=\"UserId\" value=$UserId>

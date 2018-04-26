@@ -109,6 +109,9 @@ insert into Users (UserID, password, isadmin) values ('george', '1234', 1);
 insert into Users (UserID, password, isadmin) values ('fred', '1234', 0);
 insert into Users (UserID, password, isadmin) values ('greg', '1234', 0);
 
+insert into Student (Student_ID, UserID, Fname, Lname, Age, Street_Address, City, State, Zip_Code, Student_Type, On_Probation) 
+	values ('12345', 'george', 'George', 'Dosher', 21, '1234 Broadway Ext', 'Edmond', 'OK', '73003', 'undergrad', 0);
+
 insert into Course (Course_ID, Dept_ID, Max_Seats, C_Num, Title, Start_Time, End_Time) 
 	values ('0001', 'CMSC', 20, 1053, 'Computer Technology', '09:00', '10:00');
 insert into Course (Course_ID, Dept_ID, Max_Seats, C_Num, Title, Start_Time, End_Time) 
