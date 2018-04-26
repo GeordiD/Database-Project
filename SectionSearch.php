@@ -1,7 +1,7 @@
 <?
 include "UtilityFunctions.php";
 
-$UserId =$_POST["UserId"];
+$UserId =$_GET["UserId"];
 $SessionId =$_GET["SessionId"];
 
 verify_session($SessionId);
@@ -13,33 +13,106 @@ $sql = "select Name, UserId, UserType, Password from Users";
 function allSections(&$displaystring){
 	echo("<h2> All Sections:</h2>");
 	echo("<h3> Enroll:</h3>");
-	echo("<FORM name=\"sectionsByPartialId\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId\"> " .
-		"Section Id:  <INPUT type=\"text\" name=\"SearchId\" size=\"8\" maxlength=\"8\"> " .
-		"<input type=\"submit\" class=\"button\" name=\"sectionsByPartialId\" value=\"Enroll\" />" .
+	echo("<FORM name=\"enroll\" method=\"post\" > " .
+		"Course Id:  <INPUT type=\"text\" name=\"enrollId\" size=\"8\" maxlength=\"8\"> " .
+		"<input type=\"submit\" class=\"button\" name=\"enroll\" value=\"Enroll\" />" .
 	"</FORM>");
+	
 	$sql = 	"select * from Course c1 join Semester s1 on c1.yr=s1.yr and c1.season=s1.season";
-	return statement_to_table($sql, 0, array("Course_ID", "Dept", "Max seats", "C_Num", "Title", "Start Time", "End Time"));
+	$result_array = execute_sql_in_oracle ($sql);
+	$result = $result_array["flag"];
+	$cursor = $result_array["cursor"];
+	
+	if ($result == false){
+		display_oracle_error_message($cursor);
+		die("SQL Execution problem.");
+	}
+	
+	if ($cursor == false) {
+		display_oracle_error_message($connection);
+		oci_close ($connection);
+		// sql failed 
+		die("SQL Parsing Failed");
+	}	
+	
+	$displayString = "<table border=\"1\">";	
+	$displayString .= "<tr>";
+	foreach($labels as $label){
+		$displayString .= "<col width=\"130\">";
+	}
+	foreach($labels as $label){
+		$displayString .= "<td><b>$label</b></td>";
+	}
+	$displayString .= "</tr>";
+
+	while($values = oci_fetch_assoc ($cursor)){
+		$index = 0;
+		$displayString .= "<tr>";
+		$courseId; 
+		foreach($values as $element){
+			if($index == 0){
+				$courseId = $element;
+			}
+			$displayString .= "<td>$element</td>"; 	
+			if($index == 1){
+				$studentId = getStudentID($UserId);
+			
+				/*$query = execute_sql_in_oracle(
+					"select Max_Seats from Course where Course_ID = '$element[0]'");
+				$rows = oci_fetch_array($query["cursor"]);
+				$maxSeats = $rows[0];*/
+				
+				$query = execute_sql_in_oracle(
+					"select count(*) from enrollment where Course_ID = '$courseId'");
+				$rows = oci_fetch_array($query["cursor"]);
+				$seatsTaken = $rows[0];
+				echo("The Number of seats taken are: $seatsTaken  ");
+				
+				$availableSeats = $element - $seatsTaken;
+
+				$displayString .= "<td>$availableSeats</td>";
+			}
+			$index++;
+		}
+		$displayString .= "</tr>";
+	}
+		
+	$displayString .= "<table>";
+	$displayString .= "<br />";
+	$displayString .= "<br />";
+	oci_free_statement($cursor);
+	return $displayString;
 }
 
 
 function sectionsBySemester(&$displaystring){
 	echo("<h2> Sections by semester:</h2>");
+	echo("<h3> Enroll:</h3>");
+	echo("<FORM name=\"enroll\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId&UserId=$UserId\"> " .
+		"Course Id:  <INPUT type=\"text\" name=\"enrollId\" size=\"8\" maxlength=\"8\"> " .
+		"<input type=\"submit\" class=\"button\" name=\"enroll\" value=\"Enroll\" />" .
+	"</FORM>");
 	$searchYear = $_POST["SearchYear"];
 	$searchSeason = $_POST["SearchSeason"];
 	$sql = 	"select * from Course c1 join Semester s1 on c1.yr=s1.yr and c1.season=s1.season " .
 			"where c1.yr=$searchYear and c1.season='$searchSeason'";
 	$count = oci_fetch_array (execute_sql_in_oracle ("SELECT Count(*) FROM Course")["cursor"])[0];
 	oci_free_statement($cursor);
-	return statement_to_table($sql, $count, array("UserId", "Name", "Password", "User Type"));
+	return statement_to_table($sql, $count, array("Course_ID", "Max seats", "C_Num", "Title", "Credits", "Start Time", "End Time", "Year", "Season", "Deadline"));
 }
 
 function sectionsByPartialId(&$displaystring){
 	echo("<h2> Search Sections:</h2>");
+	echo("<h3> Enroll:</h3>");
+	echo("<FORM name=\"enroll\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId&UserId=$UserId\"> " .
+		"Course Id:  <INPUT type=\"text\" name=\"enrollId\" size=\"8\" maxlength=\"8\"> " .
+		"<input type=\"submit\" class=\"button\" name=\"enroll\" value=\"Enroll\" />" .
+	"</FORM>");
 	$SearchId = $_POST['SearchId'];
-	$sql = "select * from Course where Course_ID = '$SearchId'";
+	$sql = "select * from Course where C_Num = '%$SearchId%'";
 	$count = oci_fetch_array (execute_sql_in_oracle ("SELECT Count(*) FROM Users")["cursor"])[0];
 	oci_free_statement($cursor);
-	return statement_to_table($sql, $count, array("Course_ID", "Dept", "Max seats", "C_Num", "Title", "start", "end"));
+	return statement_to_table($sql, $count, array("Course_ID", "Max seats", "C_Num", "Title", "Credits", "Start Time", "End Time", "Year", "Season", "Deadline"));
 }
 
 function deleteRecord(&$displaystring){
@@ -59,41 +132,67 @@ function deleteRecord(&$displaystring){
 	}
 }
 
-function addInfo(){
-	$addId = $_POST['addUserId'];
-	$addName = $_POST['addName'];
-	$addType = $_POST['addUserType'];
-	$password = "default";
-	$sql = "insert into Users (UserId, Name, Password, Type) ";
-	$sql .= "values ('$addId', '$addName', '$password', '$addType')";
-	$result_array = execute_sql_in_oracle ($sql);
-	$result = $result_array["flag"];
-
-	if ($result == false){
-		display_oracle_error_message($cursor);
-		die("Failed to update record");
+function enroll(){
+	$enrollId = $_POST['enrollId'];
+	$UserId =$_GET["UserId"];
+	$studentId = getStudentID($UserId);
+	
+	$query = execute_sql_in_oracle(
+		"select Max_Seats from Course where Course_ID = '$enrollId'");
+	$values = oci_fetch_array($query["cursor"]);
+	$maxSeats = $values[0];
+	
+	$query = execute_sql_in_oracle(
+		"select count(*) from enrollment where Course_ID = '$enrollId'");
+	$values = oci_fetch_array($query["cursor"]);
+	$seatsTaken = $values[0];
+	
+	$availableSeats = $maxSeats - $seatsTaken;
+	
+	
+	echo("Available seats: $availableSeats");
+	
+	if($availableSeats > 0){
+		$sql = "insert into enrollment (Course_ID, Student_ID, Grade) ";
+		$sql .= "values ('$enrollId', '$studentId', -1)";
+		$result_array = execute_sql_in_oracle ($sql);
+		$result = $result_array["flag"];
+		if ($result == false){
+			display_oracle_error_message($cursor);
+			echo("Record update failed");
+			die("Failed to enroll in class");
+		}
+		else{
+			echo("Record updated successfully");
+			echo("<br />");
+		}
 	}
 	else{
-		echo("Record updated successfully");
-		echo("<br />");
+		echo("The class is full");
 	}
+
+
 }
 
 
-
+$studentId = getStudentID($UserId);
 $buttonString = 
+	"<h2>$SessionId:</h2>" .
+	"<h2>$UserId:</h2>" .
+	"<h2>$studentId:</h2>" .
+	
 	"<br />" .
 	"<br />" .
 	"<h2>View All or Search Sections:</h2>" .
 	
-	"<FORM name=\"allSections\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId\"> " .	
+	"<FORM name=\"allSections\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId&UserId=$UserId\"> " .	
 		"<input type=\"submit\" class=\"button\" name=\"allSections\" value=\"View All Sections\" />" .
 	"</FORM>" .
 	
 	"<br />" .
 	"<br />" .
 	
-	"<FORM name=\"sectionsBySemester\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId\"> " .	
+	"<FORM name=\"sectionsBySemester\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId&UserId=$UserId\"> " .	
 		"Year:  <INPUT type=\"text\" name=\"SearchYear\" size=\"8\" maxlength=\"8\"> <br />" .
 		"Season:  <INPUT type=\"text\" name=\"SearchSeason\" size=\"8\" maxlength=\"8\"> <br />" .
 		"<input type=\"submit\" class=\"button\" name=\"sectionsBySemester\" value=\"Search Sections by Semester\" />" .
@@ -103,17 +202,18 @@ $buttonString =
 	"<br />" .
 
 	
-	"<FORM name=\"sectionsByPartialId\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId\"> " .
+	"<FORM name=\"sectionsByPartialId\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId&UserId=$UserId\"> " .
 		"Section Id:  <INPUT type=\"text\" name=\"SearchId\" size=\"8\" maxlength=\"8\"> <br />" .
 		"<input type=\"submit\" class=\"button\" name=\"sectionsByPartialId\" value=\"Search Section By Id\" />" .
 	"</FORM>" .
 	
+
 	"<br />" .
 	"<br />" .
 	
 	"<h3>Drop Section:</h3>" .
 	
-	"<FORM name=\"deleteRecord\" method=\"post\" action=\"ViewUsers.php?SessionId=$SessionId\"> " .
+	"<FORM name=\"deleteRecord\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId&UserId=$UserId\"> " .
 		"Section Id:  <INPUT type=\"text\" name=\"SearchId\" size=\"8\" maxlength=\"8\"> <br />" .
 		"<input type=\"submit\" class=\"button\" name=\"deleteRecord\" value=\"Drop Section\" />" .
 	"</FORM>" .
@@ -123,7 +223,7 @@ $buttonString =
 	
 	"<h3>Reset User Password:</h3>" .
 	
-	"<FORM name=\"ResetPassword\" method=\"post\" action=\"ResetPassword.php?SessionId=$SessionId\"> " .
+	"<FORM name=\"ResetPassword\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId&UserId=$UserId\"> " .
 		"User Id:  <INPUT type=\"text\" name=\"UserId\" size=\"8\" maxlength=\"8\"> <br />" .
 		"<INPUT type=\"hidden\" name=\"PrevURL\" value=$CurURL>" .
 		"<INPUT type=\"hidden\" name=\"SessionId\" value=$SessionId>" .
@@ -159,11 +259,8 @@ elseif(isset($_POST['sectionsBySemester'])){
 elseif(isset($_POST['sectionsByPartialId'])){
 	echo(sectionsByPartialId($displaystring));
 }
-elseif(isset($_POST['updateInfo'])){
-	updateInfo();
-}
-elseif(isset($_POST['addInfo'])){
-	addInfo();
+elseif(isset($_POST['enroll'])){
+	enroll();
 }
 elseif(isset($_POST['deleteRecord'])){
 	deleteRecord();
