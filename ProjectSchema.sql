@@ -109,11 +109,18 @@ insert into Users (UserID, password, isadmin) values ('george', '1234', 1);
 insert into Users (UserID, password, isadmin) values ('fred', '1234', 0);
 insert into Users (UserID, password, isadmin) values ('greg', '1234', 0);
 
+insert into Course (Course_ID, Dept_ID, Max_Seats, C_Num, Title, Start_Time, End_Time) 
+	values ('0001', 'CMSC', 20, 1053, 'Computer Technology', '09:00', '10:00');
+insert into Course (Course_ID, Dept_ID, Max_Seats, C_Num, Title, Start_Time, End_Time) 
+	values ('0002', 'CMSC', 25, 1513, 'Beginning Programming', '11:00', '13:00');
+insert into Course (Course_ID, Dept_ID, Max_Seats, C_Num, Title, Start_Time, End_Time) 
+	values ('0003', 'CMSC', 15, 4173, 'Translator Design', '18:00', '19:00');
 
 prompt ---------------------;
 prompt Heres all the tables;
 select table_name from user_tables;
 
+commit;
 
 prompt ;
 prompt ;
