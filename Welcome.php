@@ -8,7 +8,6 @@ $CurURL = "http://www.comsc.uco.edu/~gq011/Welcome.php?SessionId=" . $SessionId 
 
 verify_session($SessionId);
 
-
 $sql = "select isAdmin from Users " .
        "where UserId ='$UserId' ";
 	   
@@ -25,6 +24,8 @@ $values = oci_fetch_array ($cursor);
 oci_free_statement($cursor);
 
 $isAdmin = $values[0];
+$isStudent = isStudent($UserId);
+echo "things = $isStudent";
 
 // Here we can generate the content of the welcome page
 echo("<h2>Welcome User!</h2>");
@@ -45,7 +46,7 @@ if($isAdmin == '1'){
 	echo("<br />");
 }
 
-if($isAdmin == 1 || $Type == "student"){
+if($isStudent == 1){
 	echo("<h2>Student Menu:</h2>");
 	echo("Not implemented yet");  
 
