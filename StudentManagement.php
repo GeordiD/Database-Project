@@ -81,6 +81,11 @@ echo custome_printtable($sql_stud_info, array('StudentID', 'Username', 'FirstNam
 
 echo "----<br>";
 
+echo "<h3>Current Schedule</h3>";
+
+echo "----<br>";
+
+
 echo("<FORM name=\"SectionSearch\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId\"> 
 	  <INPUT type=\"hidden\" name=\"UserId\" value=$UserId>
 	  <INPUT type=\"submit\" name=\"SectionSearch\" value=\"Enroll in a section\" style=\"height:25px; width:150px\"> 
@@ -89,6 +94,13 @@ echo("<FORM name=\"SectionSearch\" method=\"post\" action=\"SectionSearch.php?Se
 
 echo("<br />");
 echo("<br />");
+
+echo "<h3>GPA: ";
+//get gpa
+echo "</h3><br>";
+
+echo "<h3>Previous Schedule</h3>";
+
 
 echo("<FORM name=\"Back\" method=\"post\" action=$PrevURL> 
 	  <INPUT type=\"hidden\" name=\"SessionId\" value=$SessionId>
