@@ -10,12 +10,25 @@ $PrevURL = $_POST["PrevURL"];
 $CurURL = $_SERVER['REQUEST_URI'];
 $sql = "select Name, UserId, UserType, Password from Users";
 
+function allSections(&$displaystring){
+	echo("<h2> All Sections:</h2>");
+	echo("<h3> Enroll:</h3>");
+	echo("<FORM name=\"sectionsByPartialId\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId\"> " .
+		"Section Id:  <INPUT type=\"text\" name=\"SearchId\" size=\"8\" maxlength=\"8\"> " .
+		"<input type=\"submit\" class=\"button\" name=\"sectionsByPartialId\" value=\"Enroll\" />" .
+	"</FORM>");
+	$sql = 	"select * from Course c1 join Semester s1 on c1.yr=s1.yr and c1.season=s1.season";
+	return statement_to_table($sql, 0, array("Course_ID", "Dept", "Max seats", "C_Num", "Title", "Start Time", "End Time"));
+}
+
 
 function sectionsBySemester(&$displaystring){
 	echo("<h2> Sections by semester:</h2>");
-	$sql = "select * from Users";
-	$sql = 	"select * from Course";
-	$count = oci_fetch_array (execute_sql_in_oracle ("SELECT Count(*) FROM Users")["cursor"])[0];
+	$searchYear = $_POST["SearchYear"];
+	$searchSeason = $_POST["SearchSeason"];
+	$sql = 	"select * from Course c1 join Semester s1 on c1.yr=s1.yr and c1.season=s1.season " .
+			"where c1.yr=$searchYear and c1.season='$searchSeason'";
+	$count = oci_fetch_array (execute_sql_in_oracle ("SELECT Count(*) FROM Course")["cursor"])[0];
 	oci_free_statement($cursor);
 	return statement_to_table($sql, $count, array("UserId", "Name", "Password", "User Type"));
 }
@@ -69,20 +82,24 @@ function addInfo(){
 
 
 $buttonString = 
+	"<br />" .
+	"<br />" .
 	"<h2>View All or Search Sections:</h2>" .
 	
 	"<FORM name=\"allSections\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId\"> " .	
-		"Year:  <INPUT type=\"text\" name=\"SearchId\" size=\"8\" maxlength=\"8\"> <br />" .
-		"Season:  <INPUT type=\"text\" name=\"SearchId\" size=\"8\" maxlength=\"8\"> <br />" .
 		"<input type=\"submit\" class=\"button\" name=\"allSections\" value=\"View All Sections\" />" .
 	"</FORM>" .
 	
+	"<br />" .
+	"<br />" .
+	
 	"<FORM name=\"sectionsBySemester\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId\"> " .	
-		"Year:  <INPUT type=\"text\" name=\"SearchId\" size=\"8\" maxlength=\"8\"> <br />" .
-		"Season:  <INPUT type=\"text\" name=\"SearchId\" size=\"8\" maxlength=\"8\"> <br />" .
+		"Year:  <INPUT type=\"text\" name=\"SearchYear\" size=\"8\" maxlength=\"8\"> <br />" .
+		"Season:  <INPUT type=\"text\" name=\"SearchSeason\" size=\"8\" maxlength=\"8\"> <br />" .
 		"<input type=\"submit\" class=\"button\" name=\"sectionsBySemester\" value=\"Search Sections by Semester\" />" .
 	"</FORM>" .
 	
+	"<br />" .
 	"<br />" .
 
 	
@@ -92,6 +109,7 @@ $buttonString =
 	"</FORM>" .
 	
 	"<br />" .
+	"<br />" .
 	
 	"<h3>Drop Section:</h3>" .
 	
@@ -100,6 +118,7 @@ $buttonString =
 		"<input type=\"submit\" class=\"button\" name=\"deleteRecord\" value=\"Drop Section\" />" .
 	"</FORM>" .
 	
+	"<br />" .
 	"<br />" .
 	
 	"<h3>Reset User Password:</h3>" .
@@ -120,6 +139,9 @@ $buttonString =
 		"<INPUT type=\"hidden\" name=\"UserId\" value=$UserId> ".
 		"<INPUT type=\"submit\" name=\"Back\" value=Back> ".
 	"</FORM>" .
+	
+	"<br />" .
+	"<br />" .
 	  
 	"<FORM name=\"Logout\" method=\"post\" action=\"LogoutAction.php?SessionId=$SessionId\"> " .
 		"<INPUT type=\"hidden\" name=\"SessionId\" value=$SessionId>".
@@ -128,8 +150,11 @@ $buttonString =
 
 echo($headerString);
 
-if(isset($_POST['displayAll'])){
-	echo(displayAll($displaystring));
+if(isset($_POST['allSections'])){
+	echo(allSections($displaystring));
+}
+elseif(isset($_POST['sectionsBySemester'])){
+	echo(sectionsBySemester($displaystring));
 }
 elseif(isset($_POST['sectionsByPartialId'])){
 	echo(sectionsByPartialId($displaystring));
