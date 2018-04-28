@@ -16,7 +16,7 @@ function allSections(&$displaystring){
 	echo("<FORM name=\"enroll\" method=\"post\" > " .
 		"Course Id:  <INPUT type=\"text\" name=\"enrollId\" size=\"8\" maxlength=\"8\"> " .
 		"<input type=\"submit\" class=\"button\" name=\"enroll\" value=\"Enroll\" />" .
-	"</FORM>");
+		"</FORM>");
 	
 	$sql = 	"select * from Course c1 join Semester s1 on c1.yr=s1.yr and c1.season=s1.season";
 	$result_array = execute_sql_in_oracle ($sql);
@@ -34,6 +34,16 @@ function allSections(&$displaystring){
 		// sql failed 
 		die("SQL Parsing Failed");
 	}	
+	$labels = array("Course_ID", "Max seats", 'Seats Available', "C_Num", "Title", "Credits", "Start Time", "End Time", "Year", "Season", "Deadline");
+	$displayString = "<table border=\"1\">";	
+	$displayString .= "<tr>";
+	foreach($labels as $label){
+		$displayString .= "<col width=\"130\">";
+	}
+	foreach($labels as $label){
+		$displayString .= "<td><b>$label</b></td>";
+	}
+	$displayString .= "</tr>";
 	
 	$displayString = "<table border=\"1\">";	
 	$displayString .= "<tr>";
@@ -55,18 +65,11 @@ function allSections(&$displaystring){
 			}
 			$displayString .= "<td>$element</td>"; 	
 			if($index == 1){
-				$studentId = getStudentID($UserId);
-			
-				/*$query = execute_sql_in_oracle(
-					"select Max_Seats from Course where Course_ID = '$element[0]'");
-				$rows = oci_fetch_array($query["cursor"]);
-				$maxSeats = $rows[0];*/
-				
+				$studentId = getStudentID($UserId);	
 				$query = execute_sql_in_oracle(
 					"select count(*) from enrollment where Course_ID = '$courseId'");
 				$rows = oci_fetch_array($query["cursor"]);
 				$seatsTaken = $rows[0];
-				echo("The Number of seats taken are: $seatsTaken  ");
 				
 				$availableSeats = $element - $seatsTaken;
 
@@ -86,33 +89,162 @@ function allSections(&$displaystring){
 
 
 function sectionsBySemester(&$displaystring){
-	echo("<h2> Sections by semester:</h2>");
+	$searchYear = $_POST["SearchYear"];
+	$searchSeason = $_POST["SearchSeason"];
+	echo("<h2> All Sections:</h2>");
 	echo("<h3> Enroll:</h3>");
-	echo("<FORM name=\"enroll\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId&UserId=$UserId\"> " .
+	echo("<FORM name=\"enroll\" method=\"post\" > " .
 		"Course Id:  <INPUT type=\"text\" name=\"enrollId\" size=\"8\" maxlength=\"8\"> " .
 		"<input type=\"submit\" class=\"button\" name=\"enroll\" value=\"Enroll\" />" .
 	"</FORM>");
-	$searchYear = $_POST["SearchYear"];
-	$searchSeason = $_POST["SearchSeason"];
-	$sql = 	"select * from Course c1 join Semester s1 on c1.yr=s1.yr and c1.season=s1.season " .
-			"where c1.yr=$searchYear and c1.season='$searchSeason'";
-	$count = oci_fetch_array (execute_sql_in_oracle ("SELECT Count(*) FROM Course")["cursor"])[0];
+	
+	$sql = 	"select * from Course c1 join Semester s1 on c1.yr=s1.yr and c1.season=s1.season" .
+			" where c1.yr=$searchYear and c1.season='$searchSeason'";
+	$result_array = execute_sql_in_oracle ($sql);
+	$result = $result_array["flag"];
+	$cursor = $result_array["cursor"];
+	
+	if ($result == false){
+		display_oracle_error_message($cursor);
+		die("SQL Execution problem.");
+	}
+	
+	if ($cursor == false) {
+		display_oracle_error_message($connection);
+		oci_close ($connection);
+		// sql failed 
+		die("SQL Parsing Failed");
+	}	
+	$labels = array("Course_ID", "Max seats", 'Seats Available', "C_Num", "Title", "Credits", "Start Time", "End Time", "Year", "Season", "Deadline");
+	$displayString = "<table border=\"1\">";	
+	$displayString .= "<tr>";
+	foreach($labels as $label){
+		$displayString .= "<col width=\"130\">";
+	}
+	foreach($labels as $label){
+		$displayString .= "<td><b>$label</b></td>";
+	}
+	$displayString .= "</tr>";
+	
+	$displayString = "<table border=\"1\">";	
+	$displayString .= "<tr>";
+	foreach($labels as $label){
+		$displayString .= "<col width=\"130\">";
+	}
+	foreach($labels as $label){
+		$displayString .= "<td><b>$label</b></td>";
+	}
+	$displayString .= "</tr>";
+
+	while($values = oci_fetch_assoc ($cursor)){
+		$index = 0;
+		$displayString .= "<tr>";
+		$courseId; 
+		foreach($values as $element){
+			if($index == 0){
+				$courseId = $element;
+			}
+			$displayString .= "<td>$element</td>"; 	
+			if($index == 1){
+				$studentId = getStudentID($UserId);	
+				$query = execute_sql_in_oracle(
+					"select count(*) from enrollment where Course_ID = '$courseId'");
+				$rows = oci_fetch_array($query["cursor"]);
+				$seatsTaken = $rows[0];
+				
+				$availableSeats = $element - $seatsTaken;
+
+				$displayString .= "<td>$availableSeats</td>";
+			}
+			$index++;
+		}
+		$displayString .= "</tr>";
+	}
+		
+	$displayString .= "<table>";
+	$displayString .= "<br />";
+	$displayString .= "<br />";
 	oci_free_statement($cursor);
-	return statement_to_table($sql, $count, array("Course_ID", "Max seats", "C_Num", "Title", "Credits", "Start Time", "End Time", "Year", "Season", "Deadline"));
+	return $displayString;
 }
 
 function sectionsByPartialId(&$displaystring){
-	echo("<h2> Search Sections:</h2>");
+	$SearchId = $_POST['SearchId'];
+	
+	echo("<h2> All Sections:</h2>");
 	echo("<h3> Enroll:</h3>");
-	echo("<FORM name=\"enroll\" method=\"post\" action=\"SectionSearch.php?SessionId=$SessionId&UserId=$UserId\"> " .
+	echo("<FORM name=\"enroll\" method=\"post\" > " .
 		"Course Id:  <INPUT type=\"text\" name=\"enrollId\" size=\"8\" maxlength=\"8\"> " .
 		"<input type=\"submit\" class=\"button\" name=\"enroll\" value=\"Enroll\" />" .
 	"</FORM>");
-	$SearchId = $_POST['SearchId'];
-	$sql = "select * from Course where C_Num = '%$SearchId%'";
-	$count = oci_fetch_array (execute_sql_in_oracle ("SELECT Count(*) FROM Users")["cursor"])[0];
+	
+	$sql = 	"select * from Course where '$SearchId' like C_num";
+	$result_array = execute_sql_in_oracle ($sql);
+	$result = $result_array["flag"];
+	$cursor = $result_array["cursor"];
+	
+	if ($result == false){
+		display_oracle_error_message($cursor);
+		die("SQL Execution problem.");
+	}
+	
+	if ($cursor == false) {
+		display_oracle_error_message($connection);
+		oci_close ($connection);
+		// sql failed 
+		die("SQL Parsing Failed");
+	}	
+	$labels = array("Course_ID", "Max seats", 'Seats Available', "C_Num", "Title", "Credits", "Start Time", "End Time", "Year", "Season", "Deadline");
+	$displayString = "<table border=\"1\">";	
+	$displayString .= "<tr>";
+	foreach($labels as $label){
+		$displayString .= "<col width=\"130\">";
+	}
+	foreach($labels as $label){
+		$displayString .= "<td><b>$label</b></td>";
+	}
+	$displayString .= "</tr>";
+	
+	$displayString = "<table border=\"1\">";	
+	$displayString .= "<tr>";
+	foreach($labels as $label){
+		$displayString .= "<col width=\"130\">";
+	}
+	foreach($labels as $label){
+		$displayString .= "<td><b>$label</b></td>";
+	}
+	$displayString .= "</tr>";
+
+	while($values = oci_fetch_assoc ($cursor)){
+		$index = 0;
+		$displayString .= "<tr>";
+		$courseId; 
+		foreach($values as $element){
+			if($index == 0){
+				$courseId = $element;
+			}
+			$displayString .= "<td>$element</td>"; 	
+			if($index == 1){
+				$studentId = getStudentID($UserId);	
+				$query = execute_sql_in_oracle(
+					"select count(*) from enrollment where Course_ID = '$courseId'");
+				$rows = oci_fetch_array($query["cursor"]);
+				$seatsTaken = $rows[0];
+				
+				$availableSeats = $element - $seatsTaken;
+
+				$displayString .= "<td>$availableSeats</td>";
+			}
+			$index++;
+		}
+		$displayString .= "</tr>";
+	}
+		
+	$displayString .= "<table>";
+	$displayString .= "<br />";
+	$displayString .= "<br />";
 	oci_free_statement($cursor);
-	return statement_to_table($sql, $count, array("Course_ID", "Max seats", "C_Num", "Title", "Credits", "Start Time", "End Time", "Year", "Season", "Deadline"));
+	return $displayString;
 }
 
 function deleteRecord(&$displaystring){
@@ -137,6 +269,33 @@ function enroll(){
 	$UserId =$_GET["UserId"];
 	$studentId = getStudentID($UserId);
 	
+	$seatsAvailable = checkAvailableSeats($enrollId);
+	$courseNeeded = checkCourseNeeded($enrollId, $studentId);
+	$hasPrereqs = checkPrereq($enrollId, $studentId);
+	
+	if($seatsAvailable == false){
+		echo("The class is full");
+		return;
+	}
+	
+	if($courseNeeded == false){
+		echo("You dont need to take this class");
+		return;
+	}
+	
+	if($hasPrereqs == false){
+		echo("You dont have the prerequisite courses");
+		return;
+	}
+		
+	$sql = "insert into enrollment (Course_ID, Student_ID, Grade) ";
+	$sql .= "values ('$enrollId', '$studentId', -1)";
+	$result_array = execute_sql_in_oracle ($sql);
+	$result = $result_array["flag"];
+	echo("Successfully enrolled in course");
+}
+
+function checkAvailableSeats($enrollId){
 	$query = execute_sql_in_oracle(
 		"select Max_Seats from Course where Course_ID = '$enrollId'");
 	$values = oci_fetch_array($query["cursor"]);
@@ -148,39 +307,57 @@ function enroll(){
 	$seatsTaken = $values[0];
 	
 	$availableSeats = $maxSeats - $seatsTaken;
-	
-	
-	echo("Available seats: $availableSeats");
-	
 	if($availableSeats > 0){
-		$sql = "insert into enrollment (Course_ID, Student_ID, Grade) ";
-		$sql .= "values ('$enrollId', '$studentId', -1)";
-		$result_array = execute_sql_in_oracle ($sql);
-		$result = $result_array["flag"];
-		if ($result == false){
-			display_oracle_error_message($cursor);
-			echo("Record update failed");
-			die("Failed to enroll in class");
-		}
-		else{
-			echo("Record updated successfully");
-			echo("<br />");
-		}
+		return true;
 	}
 	else{
-		echo("The class is full");
+		return false;
 	}
+}
 
+function checkCourseNeeded($enrollId, $studentId){
+	$query = execute_sql_in_oracle(
+		"select Course_id from Enrollment 
+		where Course_id = '$enrollId' and student_id = '$studentId'");
+	$course = oci_fetch_array($query["cursor"]);
+	if($course[0]){
+		
+		return false;
+	}
+	else{
+		return true;
+	}
+}
 
+function checkPrereq($enrollId, $studentId){
+	$query = execute_sql_in_oracle(
+		"select pre_courseid from Prereq where post_courseid = '$enrollId'");
+	$cursor = $query["cursor"];
+	$test = 0;
+	while($values = oci_fetch_assoc ($cursor)){
+		foreach($values as $element){		
+			$query2 = execute_sql_in_oracle(
+				"select Course_id from Enrollment where student_id = '$studentId' and grade > 0");
+			$cursor2 = $query2["cursor"];
+			$found = false;
+			while($values2 = oci_fetch_assoc ($cursor2)){
+				foreach($values2 as $element2){
+					if($element == $element2){
+						$found = true;
+					}
+				}
+			}
+			if($found == false){
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 
 $studentId = getStudentID($UserId);
 $buttonString = 
-	"<h2>$SessionId:</h2>" .
-	"<h2>$UserId:</h2>" .
-	"<h2>$studentId:</h2>" .
-	
 	"<br />" .
 	"<br />" .
 	"<h2>View All or Search Sections:</h2>" .
